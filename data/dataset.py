@@ -6,6 +6,7 @@
 from torchvision.datasets import ImageFolder
 from torchvision import transforms as T
 from config import opt
+import cv2
 
 
 class RecaptureDataset(ImageFolder):
@@ -17,6 +18,16 @@ class RecaptureDataset(ImageFolder):
             self.transform = self._training_transform()
         else:
             self.transform = self._evaluation_transform()
+
+    def __getitem__(self, idx):
+        path, target = self.samples[idx]
+        sample = self.loader(path)
+        dct_sample = cv2.imread(path)
+        if self.transform is not None:
+            sample = self.transform(sample)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
 
     @staticmethod
     def _training_transform():

@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="49943545-f14b-4a2e-be06-00e73b538bf5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/dataset.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,12 +39,12 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture",
+    "last_opened_file_path": "/Users/fengping/Documents/projects/Two-branch-Document-Recapture",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "copyright",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -58,6 +59,7 @@
       <workItem from="1691991932433" duration="8126000" />
       <workItem from="1692004719045" duration="540000" />
       <workItem from="1692005280748" duration="176000" />
+      <workItem from="1692020905037" duration="2023000" />
     </task>
     <task id="LOCAL-00001" summary="adding code">
       <created>1692004753552</created>

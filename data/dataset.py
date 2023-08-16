@@ -23,7 +23,7 @@ class RecaptureDataset(ImageFolder):
         path, target = self.samples[idx]
         sample = self.loader(path)
         # load using opencv to perform DCT
-        dct_sample = cv2.imread(path)
+        # dct_sample = cv2.imread(path)
         if self.transform is not None:
             sample = self.transform(sample)
         if self.target_transform is not None:

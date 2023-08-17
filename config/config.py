@@ -3,6 +3,7 @@
 #   All rights reserved.
 #
 import torch
+import torch.optim as optim
 from utils import logger
 class DefaultConfig():
     model = "" #model name
@@ -15,7 +16,8 @@ class DefaultConfig():
 
     train_batch_size = 64
     test_batch_size = 64
-    scheduler = torch.optim.lr_scheduler.LRScheduler()
+    optm = optim.Adam
+    scheduler = optim.lr_scheduler.LRScheduler
     num_workers = 8
     max_epoch = 20
     lr = 0.1

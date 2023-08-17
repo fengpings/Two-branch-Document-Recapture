@@ -6,7 +6,7 @@
 from torchvision.datasets import ImageFolder
 from torchvision import transforms as T
 from config import opt
-import cv2
+from utils import transforms
 
 
 class RecaptureDataset(ImageFolder):
@@ -14,21 +14,20 @@ class RecaptureDataset(ImageFolder):
         super(RecaptureDataset, self).__init__(root=root)
 
         self.training = training
-        if self.trainig:
+        if self.training:
             self.transform = self._training_transform()
         else:
             self.transform = self._evaluation_transform()
+        self.dct_transform = self._dct_transform()
 
     def __getitem__(self, idx):
         path, target = self.samples[idx]
         sample = self.loader(path)
-        # load using opencv to perform DCT
-        # dct_sample = cv2.imread(path)
-        if self.transform is not None:
-            sample = self.transform(sample)
         if self.target_transform is not None:
             target = self.target_transform(target)
-
+        sample_img = self.transform(sample)
+        sample_dct = self.dct_transform(sample)
+        return sample_img, sample_dct, target
 
 
     @staticmethod
@@ -47,4 +46,11 @@ class RecaptureDataset(ImageFolder):
             T.Resize(opt.img_size),
             T.ToTensor(),
             T.Normalize(mean=opt.data_mean, std=opt.data_mean)
+        ])
+
+    @staticmethod
+    def _dct_transform():
+        return T.Compose([
+            T.Resize(opt.img_size),
+            transforms.DCT()
         ])

@@ -26,4 +26,4 @@ class DCT(torch.nn.Module):
         img_dct_low = cv2.idct(img_dct * low_freq)[None, :, :]
         img_dct_mid = cv2.idct(img_dct * mid_freq)[None, :, :]
         img_dct_high = cv2.idct(img_dct * high_freq)[None, :, :]
-        return torch.from_numpy(np.concatenate((img_dct_low, img_dct_mid, img_dct_high), axis=0)) / 255.0
+        return torch.from_numpy(np.concatenate((img_dct_low, img_dct_mid, img_dct_high), axis=0)).contiguous() / 255.0

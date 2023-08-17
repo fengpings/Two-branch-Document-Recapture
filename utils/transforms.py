@@ -3,6 +3,7 @@
 #  All rights reserved.
 import cv2
 import numpy as np
+import torch
 
 # implementation of filter bank preprocess module using DCT
 def filter_bank_preprocess(img_path: str, k: int=10):
@@ -17,4 +18,4 @@ def filter_bank_preprocess(img_path: str, k: int=10):
     img_dct_low = cv2.idct(img_dct * low_freq)[:, :, None]
     img_dct_mid = cv2.idct(img_dct * mid_freq)[:, :, None]
     img_dct_high = cv2.idct(img_dct * high_freq)[:, :, None]
-    return np.concatenate((img_dct_low, img_dct_mid, img_dct_high), axis=2)
+    return torch.from_numpy(np.concatenate((img_dct_low, img_dct_mid, img_dct_high), axis=2))

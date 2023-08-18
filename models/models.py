@@ -38,8 +38,15 @@ class ResNet50Branch(nn.Module):
         return l1, l3, l4
 
 
-# code from CrossViT
 class CrossAttention(nn.Module):
+    def __init__(self):
+        super(CrossAttention, self).__init__()
+
+    def forward(self, x):
+        pass
+
+# code from CrossViT
+class CrossAttentionvit(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
         super().__init__()
         self.num_heads = num_heads
@@ -70,7 +77,7 @@ class CrossAttention(nn.Module):
         x = self.proj_drop(x)
         return x
 
-class CrossAttentionBlock(nn.Module):
+class CrossAttentionBlockvit(nn.Module):
 
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
                  drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, has_mlp=True):

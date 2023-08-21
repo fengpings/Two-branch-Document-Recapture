@@ -15,10 +15,24 @@ class TBNet(nn.Module):
         self.ca_l1 = CrossAttention(dim=256)
         self.ca_l3 = CrossAttention(dim=1024)
         self.ca_l4 = CrossAttention(dim=2048)
+        self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1,1))
+        self.bn1 = nn.BatchNorm2d(6656)  # 256+1024+2048
+        self.relu = nn.ReLU(inplace=True)
+        self.mlp = MLP()
 
     def forward(self, x):
-        pass
-
+        dct_l1, dct_l3, dct_l4 = self.dct_branch(x)
+        rgb_l1, rgb_l3, rgb_l4 = self.rgb_branch(x)
+        a1 = self.ca_l1(dct_l1, rgb_l1)
+        a2 = self.ca_l3(dct_l3, rgb_l3)
+        a3 = self.ca_l4(dct_l4, rgb_l4)
+        a = torch.concat((a1, a2, a3), dim=1)
+        a = self.bn1(a)
+        a = self.relu(a)
+        a = self.avg_pool(a)
+        a = a.flatten(1)
+        a = self.mlp(a)
+        return a
 
 class ResNet50Branch(nn.Module):
     def __init__(self):
@@ -83,61 +97,19 @@ class CrossAttention(nn.Module):
         y_a = (attn2 @ v1) + y  # [N,HW,HW] @ [N,HW,C] -> [N,HW, C]
         y_a = y_a.transpose(-2, -1).reshape(N, C, H, W)  # [N,HW,C] -> [N,C,HW] -> [N,C,H,W]
         # concat cross attention from branch1 and branch2
-        z = torch.concat((x_a, y_a), dim=1)
-        z = nn.functional.interpolate(input=z, size=self.output_size, mode='bilinear')
+        z = torch.concat((x_a, y_a), dim=1) # [N,C,H,W] -> [N,2C,H,W]
+        z = nn.functional.interpolate(input=z, size=self.output_size, mode='bilinear')  # [N,C,7,7]
         return z
 
-# code from CrossViT
-class CrossAttentionvit(nn.Module):
-    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
-        super().__init__()
-        self.num_heads = num_heads
-        head_dim = dim // num_heads
-        # NOTE scale factor was wrong in my original version, can set manually to be compat with prev weights
-        self.scale = qk_scale or head_dim ** -0.5
 
-        self.wq = nn.Linear(dim, dim, bias=qkv_bias)
-        self.wk = nn.Linear(dim, dim, bias=qkv_bias)
-        self.wv = nn.Linear(dim, dim, bias=qkv_bias)
-        self.attn_drop = nn.Dropout(attn_drop)
-        self.proj = nn.Linear(dim, dim)
-        self.proj_drop = nn.Dropout(proj_drop)
+class MLP(nn.Module):
+    def __init__(self, in_dim=6656):
+        super(MLP, self).__init__()
+        self.model = nn.Sequential(
+            nn.Linear(in_dim, 1024),
+            nn.Linear(1024, 2)
+        )
 
     def forward(self, x):
-
-        B, N, C = x.shape
-        q = self.wq(x[:, 0:1, ...]).reshape(B, 1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  # B1C -> B1H(C/H) -> BH1(C/H)
-        k = self.wk(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  # BNC -> BNH(C/H) -> BHN(C/H)
-        v = self.wv(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  # BNC -> BNH(C/H) -> BHN(C/H)
-
-        attn = (q @ k.transpose(-2, -1)) * self.scale  # BH1(C/H) @ BH(C/H)N -> BH1N
-        attn = attn.softmax(dim=-1)
-        attn = self.attn_drop(attn)
-
-        x = (attn @ v).transpose(1, 2).reshape(B, 1, C)   # (BH1N @ BHN(C/H)) -> BH1(C/H) -> B1H(C/H) -> B1C
-        x = self.proj(x)
-        x = self.proj_drop(x)
-        return x
-
-class CrossAttentionBlockvit(nn.Module):
-
-    def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, has_mlp=True):
-        super().__init__()
-        self.norm1 = norm_layer(dim)
-        self.attn = CrossAttention(
-            dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
-        # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
-        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        self.has_mlp = has_mlp
-        if has_mlp:
-            self.norm2 = norm_layer(dim)
-            mlp_hidden_dim = int(dim * mlp_ratio)
-            self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-
-    def forward(self, x):
-        x = x[:, 0:1, ...] + self.drop_path(self.attn(self.norm1(x)))
-        if self.has_mlp:
-            x = x + self.drop_path(self.mlp(self.norm2(x)))
-
+        x = self.model(x)
         return x

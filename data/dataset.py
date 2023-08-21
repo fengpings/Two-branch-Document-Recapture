@@ -29,7 +29,6 @@ class RecaptureDataset(ImageFolder):
         sample_dct = self.dct_transform(sample)
         return sample_img, sample_dct, target
 
-
     @staticmethod
     def _training_transform():
         return T.Compose([

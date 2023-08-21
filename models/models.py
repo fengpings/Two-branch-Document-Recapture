@@ -2,6 +2,7 @@
 #   date: 2023-8-14
 #   All rights reserved.
 #
+import torch
 import torch.nn as nn
 from torchvision.models import mobilenet_v3_large, resnet50
 
@@ -11,6 +12,12 @@ class TBNet(nn.Module):
         super(TBNet, self).__init__()
         self.dct_branch = ResNet50Branch()
         self.rgb_branch = ResNet50Branch()
+        self.ca_l1 = CrossAttention(dim=256)
+        self.ca_l3 = CrossAttention(dim=1024)
+        self.ca_l4 = CrossAttention(dim=2048)
+
+    def forward(self, x):
+        pass
 
 
 class ResNet50Branch(nn.Module):
@@ -39,11 +46,46 @@ class ResNet50Branch(nn.Module):
 
 
 class CrossAttention(nn.Module):
-    def __init__(self):
+    def __init__(self, dim, qkv_bias=False, output_size=(7, 7)):
         super(CrossAttention, self).__init__()
+        self.output_size = output_size
+        # scale factor
+        self.scale = dim ** -0.5
+        # qkv for branch1
+        self.wq1 = nn.Linear(dim, dim, bias=qkv_bias)
+        self.wk1 = nn.Linear(dim, dim, bias=qkv_bias)
+        self.wv1 = nn.Linear(dim, dim, bias=qkv_bias)
+        # qkv for branch2
+        self.wq2 = nn.Linear(dim, dim, bias=qkv_bias)
+        self.wk2 = nn.Linear(dim, dim, bias=qkv_bias)
+        self.wv2 = nn.Linear(dim, dim, bias=qkv_bias)
 
-    def forward(self, x):
-        pass
+    def forward(self, x, y):
+        N, C, H, W = x.shape
+        x = x.flatten(2).transpose(-2, -1)  # [N,C,H,W] -> [N,HW,C]
+        y = y.flatten(2).transpose(-2, -1)  # [N,C,H,W] -> [N,HW,C]
+        # q, k, v for branch1
+        q1 = self.wq1(x)  # [N,HW,C] -> [N,HW,C]
+        k1 = self.wk1(x)  # [N,HW,C] -> [N,HW,C]
+        v1 = self.wv1(x)  # [N,HW,C] -> [N,HW,C]
+        # q, k , v for branch2
+        q2 = self.wq2(y)  # [N,HW,C] -> [N,HW,C]
+        k2 = self.wk2(y)  # [N,HW,C] -> [N,HW,C]
+        v2 = self.wv2(y)  # [N,HW,C] -> [N,HW,C]
+        # get cross attention output of branch1
+        attn1 = q1 @ k2.transpose(-2, -1) * self.scale  # [N,HW,C] @ [N,C,HW] -> [N, HW, HW]
+        attn1 = attn1.softmax(dim=-1)
+        x_a = (attn1 @ v2) + x  # [N,HW,HW] @ [N,HW,C] -> [N,HW,C]
+        x_a = x_a.transpose(-2, -1).reshape(N, C, H, W)  # [N,HW,C] -> [N,C,HW] -> [N,C,H,W]
+        # get cross attention output of branch2
+        attn2 = q2 @ k1.transpose(-2, -1) * self.scale  # [N,HW,C] @ [N,C,HW] -> [N, HW, HW]
+        attn2 = attn2.softmax(dim=-1)
+        y_a = (attn2 @ v1) + y  # [N,HW,HW] @ [N,HW,C] -> [N,HW, C]
+        y_a = y_a.transpose(-2, -1).reshape(N, C, H, W)  # [N,HW,C] -> [N,C,HW] -> [N,C,H,W]
+        # concat cross attention from branch1 and branch2
+        z = torch.concat((x_a, y_a), dim=1)
+        z = nn.functional.interpolate(input=z, size=self.output_size, mode='bilinear')
+        return z
 
 # code from CrossViT
 class CrossAttentionvit(nn.Module):

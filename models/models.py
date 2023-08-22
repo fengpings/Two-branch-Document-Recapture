@@ -20,9 +20,9 @@ class TBNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.mlp = MLP()
 
-    def forward(self, x):
-        dct_l1, dct_l3, dct_l4 = self.dct_branch(x)
-        rgb_l1, rgb_l3, rgb_l4 = self.rgb_branch(x)
+    def forward(self, dct_img, rgb_img):
+        dct_l1, dct_l3, dct_l4 = self.dct_branch(dct_img)
+        rgb_l1, rgb_l3, rgb_l4 = self.rgb_branch(rgb_img)
         a1 = self.ca_l1(dct_l1, rgb_l1)
         a2 = self.ca_l3(dct_l3, rgb_l3)
         a3 = self.ca_l4(dct_l4, rgb_l4)
@@ -33,6 +33,7 @@ class TBNet(nn.Module):
         a = a.flatten(1)
         a = self.mlp(a)
         return a
+
 
 class ResNet50Branch(nn.Module):
     def __init__(self):
@@ -97,7 +98,7 @@ class CrossAttention(nn.Module):
         y_a = (attn2 @ v1) + y  # [N,HW,HW] @ [N,HW,C] -> [N,HW, C]
         y_a = y_a.transpose(-2, -1).reshape(N, C, H, W)  # [N,HW,C] -> [N,C,HW] -> [N,C,H,W]
         # concat cross attention from branch1 and branch2
-        z = torch.concat((x_a, y_a), dim=1) # [N,C,H,W] -> [N,2C,H,W]
+        z = torch.concat((x_a, y_a), dim=1)  # [N,C,H,W] -> [N,2C,H,W]
         z = nn.functional.interpolate(input=z, size=self.output_size, mode='bilinear')  # [N,C,7,7]
         return z
 
@@ -105,10 +106,11 @@ class CrossAttention(nn.Module):
 class MLP(nn.Module):
     def __init__(self, in_dim=6656):
         super(MLP, self).__init__()
-        self.model = nn.Sequential(
-            nn.Linear(in_dim, 1024),
-            nn.Linear(1024, 2)
-        )
+        # self.model = nn.Sequential(
+        #     nn.Linear(in_dim, 1024),
+        #     nn.Linear(1024, 2)
+        # )
+        self.model = nn.Linear(in_dim, 2)
 
     def forward(self, x):
         x = self.model(x)

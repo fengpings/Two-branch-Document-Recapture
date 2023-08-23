@@ -113,7 +113,7 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # utils
     # ------------------------------------------------------------------
-    device = None
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_model = True
 
     def parse(self, kwargs):
@@ -121,7 +121,6 @@ class DefaultConfig:
             if not hasattr(self, k):
                 logger.warning(f"{self.__class__} does not have attribute {k}")
             setattr(self, k, v)
-        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         logger.info("User Configuration: ")
         print('='*50)
         if not os.path.exists(self.output_path):

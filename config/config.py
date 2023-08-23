@@ -11,7 +11,7 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # model config
     # ------------------------------------------------------------------
-    model = "TBNet"  # model name
+    model = "Res50TBNet"  # model name
     train_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/train"
     val_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/val"
     test_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/test"
@@ -114,7 +114,7 @@ class DefaultConfig:
     # utils
     # ------------------------------------------------------------------
     device = None
-    save_model = False
+    save_model = True
 
     def parse(self, kwargs):
         for k, v in kwargs.items():

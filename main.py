@@ -22,8 +22,6 @@ import argparse
 
 def train(**kwargs):
     setup_seed(42)
-    cfg.parse(kwargs)
-
     # make dirs
     run_out_path = os.path.join(cfg.output_path, cfg.run_name)
     if not os.path.exists(run_out_path):
@@ -31,6 +29,7 @@ def train(**kwargs):
     model_out_path = os.path.join(run_out_path, 'models')
     if not os.path.exists(model_out_path):
         os.mkdir(model_out_path)
+    cfg.parse(kwargs)
     # data preparation
     train_dataset = RecaptureDataset(root=cfg.train_root, training=True)
     train_loader = DataLoader(dataset=train_dataset,
@@ -116,6 +115,7 @@ def train(**kwargs):
                              f'lr:{cur_lr}'
                              f'loss:{loss.item():.3f} '
                              f'accuracy:{acc.item():.3f}')
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=10, norm_type=2)
             opt.step()
             # if using SGD, update learning rate by scheduler
             if scheduler:

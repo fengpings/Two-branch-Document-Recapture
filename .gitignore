@@ -3,3 +3,6 @@
 **/*.jpg
 **/*.png
 **/*.PNG
+output/run1/summary/
+output/run1/models/
+output/run1/

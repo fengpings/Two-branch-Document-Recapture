@@ -7,9 +7,9 @@ import torch.nn as nn
 from torchvision.models import mobilenet_v3_large, resnet50
 
 
-class TBNet(nn.Module):
+class Res50TBNet(nn.Module):
     def __init__(self):
-        super(TBNet, self).__init__()
+        super(Res50TBNet, self).__init__()
         self.dct_branch = ResNet50Branch()
         self.rgb_branch = ResNet50Branch()
         self.ca_l1 = CrossAttention(dim=256)

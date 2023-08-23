@@ -1,7 +1,8 @@
-#   Author: fengping su
-#   date: 2023-8-14
-#   All rights reserved.
-#
+
+#  Author: fengping su
+#  date: 2023-8-23
+#  All rights reserved.
+
 import torch
 import torch.nn as nn
 from torchvision.models import mobilenet_v3_large, resnet50

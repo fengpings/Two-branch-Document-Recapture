@@ -56,10 +56,12 @@ class Res50TBNet(nn.Module):
         rgb_l1, rgb_l3, rgb_l4 = self.rgb_branch(rgb_img)
 
         if self.compress_factor < 1.0:
-            dct_l3 = self.conv1x1_dct1(dct_l3)
-            dct_l4 = self.conv1x1_dct2(dct_l4)
-            rgb_l3 = self.conv1x1_rgb1(rgb_l3)
-            rgb_l4 = self.conv1x1_rgb2(rgb_l4)
+            dct_l1 = self.conv1x1_dct1(dct_l1)
+            dct_l3 = self.conv1x1_dct2(dct_l3)
+            dct_l4 = self.conv1x1_dct3(dct_l4)
+            rgb_l1 = self.conv1x1_rgb1(rgb_l1)
+            rgb_l3 = self.conv1x1_rgb2(rgb_l3)
+            rgb_l4 = self.conv1x1_rgb3(rgb_l4)
 
         a1 = self.ca_l1(dct_l1, rgb_l1)
         a2 = self.ca_l3(dct_l3, rgb_l3)

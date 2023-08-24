@@ -101,8 +101,8 @@ def train(**kwargs):
 
             # calculate batch loss, accuracy, tp, fp, tn, fn
             loss = loss_fn(logits, ys)
-            acc = cal_acc(logits, ys)
-            tp, fp, tn, fn = cal_pn(logits, ys)
+            acc = cal_acc(logits.detach(), ys)
+            tp, fp, tn, fn = cal_pn(logits.detach(), ys)
             TP += tp.item()
             FP += fp.item()
             TN += tn.item()
@@ -221,24 +221,25 @@ def val(model, val_loader, loss_fn):
     val_accs, val_losses = [], []
     TP, FP, TN, FN = 0, 0, 0, 0
 
-    for _, (dcts, rgbs, ys) in enumerate(val_loader):
-        # data to device
-        dcts = dcts.to(device=cfg.device)
-        rgbs = rgbs.to(device=cfg.device)
-        ys = ys.to(device=cfg.device)
+    with torch.no_grad():
+        for _, (dcts, rgbs, ys) in enumerate(val_loader):
+            # data to device
+            dcts = dcts.to(device=cfg.device)
+            rgbs = rgbs.to(device=cfg.device)
+            ys = ys.to(device=cfg.device)
 
-        logits = model(dcts, rgbs)
-        # calculate batch loss, accuracy, tp, fp, tn, fn
-        loss = loss_fn(logits, ys)
-        acc = cal_acc(logits, ys)
-        tp, fp, tn, fn = cal_pn(logits, ys)
-        TP += tp.item()
-        FP += fp.item()
-        TN += tn.item()
-        FN += fn.item()
+            logits = model(dcts, rgbs)
+            # calculate batch loss, accuracy, tp, fp, tn, fn
+            loss = loss_fn(logits, ys)
+            acc = cal_acc(logits, ys)
+            tp, fp, tn, fn = cal_pn(logits, ys)
+            TP += tp.item()
+            FP += fp.item()
+            TN += tn.item()
+            FN += fn.item()
 
-        val_accs.append(acc.item())
-        val_losses.append(loss.item())
+            val_accs.append(acc.item())
+            val_losses.append(loss.item())
 
     val_acc = np.mean(val_accs)
     val_loss = np.mean(val_losses)

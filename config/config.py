@@ -22,6 +22,9 @@ class DefaultConfig:
     test_model_path = ""  # path to model for testing
     output_path = './output'
 
+    Res50TBNet = {
+        "compress_factor": 1.0
+    }
     # ------------------------------------------------------------------
     # train test dataloader config
     # ------------------------------------------------------------------
@@ -34,7 +37,7 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # optimizer
     # ------------------------------------------------------------------
-    optimizer = "RAdam"
+    optimizer = "SGD"
     Adam = {
         "lr": 0.001,
         "betas": (0.9, 0.999),
@@ -43,7 +46,7 @@ class DefaultConfig:
     }
 
     SGD = {
-        "lr": 0.1,
+        "lr": 1.e-6,
         "momentum": 0.9,
         "weight_decay": 1e-4,
         "dampening": 0,
@@ -77,7 +80,7 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # lr scheduler
     # ------------------------------------------------------------------
-    scheduler = "CosineAnnealingWarmupLR"
+    scheduler = "OneCycleLR"
     max_epoch = 160
     CosineAnnealingWarmupLR = {
         "warmup_iters": 10,
@@ -87,8 +90,8 @@ class DefaultConfig:
     }
 
     OneCycleLR = {
-        'max_lr': 0.1,
-        'total_steps': 160*2,
+        'max_lr': 0.01,
+        'total_steps': 160*5,
         'epochs': None,
         'steps_per_epoch': None,
         'pct_start': 0.3,
@@ -105,8 +108,8 @@ class DefaultConfig:
     # img transforms
     # ------------------------------------------------------------------
     img_size = (224, 224)
-    h_flip_p = 0.5
-    v_flip_p = 0.5
+    h_flip_p = 0.0
+    v_flip_p = 0.0
     data_mean = [0.6235, 0.6006, 0.5880]
     data_std = [0.2236, 0.2346, 0.2490]
 
@@ -114,7 +117,7 @@ class DefaultConfig:
     # utils
     # ------------------------------------------------------------------
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    save_model = True
+    save_model = False
 
     def parse(self, kwargs):
         for k, v in kwargs.items():
@@ -123,8 +126,6 @@ class DefaultConfig:
             setattr(self, k, v)
         logger.info("User Configuration: ")
         print('='*50)
-        if not os.path.exists(self.output_path):
-            os.mkdir(self.output_path)
         with open(os.path.join(os.path.join(self.output_path, self.run_name), 'config.txt'), 'w') as f:
             for k, v in self.__class__.__dict__.items():
                 if not k.startswith('_') and not isinstance(v, dict) and k != 'parse':

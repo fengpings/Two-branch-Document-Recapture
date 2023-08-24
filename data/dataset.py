@@ -37,7 +37,7 @@ class RecaptureDataset(ImageFolder):
             T.RandomHorizontalFlip(p=cfg.h_flip_p),
             T.RandomVerticalFlip(p=cfg.v_flip_p),
             T.ToTensor(),
-            T.Normalize(mean=cfg.data_mean, std=cfg.data_std)
+            # T.Normalize(mean=cfg.data_mean, std=cfg.data_std)
         ])
 
     @staticmethod
@@ -45,7 +45,7 @@ class RecaptureDataset(ImageFolder):
         return T.Compose([
             T.Resize(cfg.img_size),
             T.ToTensor(),
-            T.Normalize(mean=cfg.data_mean, std=cfg.data_std)
+            # T.Normalize(mean=cfg.data_mean, std=cfg.data_std)
         ])
 
     @staticmethod

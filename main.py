@@ -24,6 +24,8 @@ import argparse
 def train(**kwargs):
     setup_seed(42)
     # make dirs
+    if not os.path.exists(cfg.output_path):
+        os.mkdir(cfg.output_path)
     run_out_path = os.path.join(cfg.output_path, cfg.run_name)
     if not os.path.exists(run_out_path):
         os.mkdir(run_out_path)
@@ -48,8 +50,10 @@ def train(**kwargs):
                             pin_memory=cfg.pin_mem)
 
     # model
-    model = getattr(models, cfg.model)()
+    model = getattr(models, cfg.model)(**cfg.Res50TBNet)
     model.to(device=cfg.device)
+    logger.info("Model Summary: ")
+    print(model)
 
     # optimizer
     opt = None
@@ -113,8 +117,8 @@ def train(**kwargs):
             if (batch + 1) % 500 == 0:
                 logger.debug(f'[train epoch:{epoch}/{cfg.max_epoch}] '
                              f'[batch:{batch}] '
-                             f'lr:{cur_lr}'
-                             f'loss:{loss.item():.3f} '
+                             f'lr:{cur_lr}|'
+                             f'loss:{loss.item():.3f}|'
                              f'accuracy:{acc.item():.3f}')
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=10, norm_type=2)
             opt.step()
@@ -133,6 +137,7 @@ def train(**kwargs):
         nonrecap_precision = TN/(TN+FN+1e-8)
         nonrecap_recall = TN/(TN+FP+1e-8)
         logger.debug(f'[train epoch:{epoch}/{cfg.max_epoch} summary:] '
+                     f"lr:{list(opt.param_groups)[0]['lr']}|"
                      f'accuracy:{epoch_acc:.3f}|'
                      f'loss:{epoch_loss:.3f}|'
                      f'recap precision:{recap_precision:.3f}|'
@@ -177,6 +182,8 @@ def train(**kwargs):
                 # "scheduler": scheduler
             }, os.path.join(model_out_path, f'{epoch}_{val_acc:.3f}.pt'))
             logger.info(f'model of epoch {epoch} saved')
+        else:
+            logger.info(f'model of epoch {epoch} not saved!')
 
     writer.close()
 

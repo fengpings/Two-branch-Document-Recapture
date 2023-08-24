@@ -9,21 +9,58 @@ from torchvision.models import mobilenet_v3_large, resnet50
 
 
 class Res50TBNet(nn.Module):
-    def __init__(self):
+    def __init__(self, compress_factor=1.0):
         super(Res50TBNet, self).__init__()
+        self.compress_factor = compress_factor
+        self.conv1x1_dct1 = None
+        self.conv1x1_dct2 = None
+        self.conv1x1_rgb1 = None
+        self.conv1x1_rgb2 = None
+        if compress_factor < 1.0:
+            self.conv1x1_dct1 = nn.Conv2d(256,
+                                          int(256 * self.compress_factor),
+                                          kernel_size=1,
+                                          stride=1)
+            self.conv1x1_dct2 = nn.Conv2d(1024,
+                                          int(1024*self.compress_factor),
+                                          kernel_size=1,
+                                          stride=1)
+            self.conv1x1_dct3 = nn.Conv2d(2048,
+                                          int(2048*self.compress_factor),
+                                          kernel_size=1,
+                                          stride=1)
+            self.conv1x1_rgb1 = nn.Conv2d(256,
+                                          int(256 * self.compress_factor),
+                                          kernel_size=1,
+                                          stride=1)
+            self.conv1x1_rgb2 = nn.Conv2d(1024,
+                                          int(1024*self.compress_factor),
+                                          kernel_size=1,
+                                          stride=1)
+            self.conv1x1_rgb3 = nn.Conv2d(2048,
+                                          int(2048*self.compress_factor),
+                                          kernel_size=1,
+                                          stride=1)
         self.dct_branch = ResNet50Branch()
         self.rgb_branch = ResNet50Branch()
-        self.ca_l1 = CrossAttention(dim=256)
-        self.ca_l3 = CrossAttention(dim=1024)
-        self.ca_l4 = CrossAttention(dim=2048)
-        self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1,1))
-        self.bn1 = nn.BatchNorm2d(6656)  # 256+1024+2048
+        self.ca_l1 = CrossAttention(dim=int(256*self.compress_factor))
+        self.ca_l3 = CrossAttention(dim=int(1024 * self.compress_factor))
+        self.ca_l4 = CrossAttention(dim=int(2048*self.compress_factor))
+        self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
+        self.bn1 = nn.BatchNorm2d(int(6656*self.compress_factor))
         self.relu = nn.ReLU(inplace=True)
-        self.mlp = MLP()
+        self.mlp = MLP(in_dim=int(6656*self.compress_factor))
 
     def forward(self, dct_img, rgb_img):
         dct_l1, dct_l3, dct_l4 = self.dct_branch(dct_img)
         rgb_l1, rgb_l3, rgb_l4 = self.rgb_branch(rgb_img)
+
+        if self.compress_factor < 1.0:
+            dct_l3 = self.conv1x1_dct1(dct_l3)
+            dct_l4 = self.conv1x1_dct2(dct_l4)
+            rgb_l3 = self.conv1x1_rgb1(rgb_l3)
+            rgb_l4 = self.conv1x1_rgb2(rgb_l4)
+
         a1 = self.ca_l1(dct_l1, rgb_l1)
         a2 = self.ca_l3(dct_l3, rgb_l3)
         a3 = self.ca_l4(dct_l4, rgb_l4)

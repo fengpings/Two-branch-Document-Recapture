@@ -23,7 +23,7 @@ class DefaultConfig:
     output_path = './output'
 
     Res50TBNet = {
-        "compress_factor": 1.0
+        "compress_factor": 0.25
     }
     # ------------------------------------------------------------------
     # train test dataloader config
@@ -99,8 +99,8 @@ class DefaultConfig:
         'cycle_momentum': True,
         'base_momentum': 0.85,
         'max_momentum': 0.95,
-        'div_factor': 25.,
-        'final_div_factor': 1e4,
+        'div_factor': 1000.,  # initial_lr = max_lr/div_factor
+        'final_div_factor': 1e4,  # min_lr = initial_lr/final_div_factor
         'three_phase': False
     }
 

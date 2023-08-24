@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import torch
 
+
 # implementation of filter bank preprocess module using DCT
 class DCT(torch.nn.Module):
     def __init__(self, k=10):
@@ -16,7 +17,8 @@ class DCT(torch.nn.Module):
     def forward(self, pil_img):
         return self._filter_bank_preprocess(pil_img)
 
-    def _filter_bank_preprocess(self, pil_img, k: int = 10):
+    @staticmethod
+    def _filter_bank_preprocess(pil_img, k: int = 10):
         img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2GRAY).astype(np.float32)
         img_dct = cv2.dct(img)
         img_dct_f = np.abs(img_dct)

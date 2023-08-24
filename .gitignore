@@ -6,3 +6,5 @@
 output/run1/summary/
 output/run1/models/
 output/run1/
+
+.DS_Store

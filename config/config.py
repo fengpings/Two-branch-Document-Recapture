@@ -12,11 +12,11 @@ class DefaultConfig:
     # model config
     # ------------------------------------------------------------------
     model = "Res50TBNet"  # model name
-    train_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/train"
-    val_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/val"
+    train_root = "/Users/fengping/Documents/深度学习笔记/CV基础/code/datas/dogcat/train"
+    val_root = "/Users/fengping/Documents/深度学习笔记/CV基础/code/datas/dogcat/test"
     test_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/test"
 
-    run_name = "run1"
+    run_name = "run2"
 
     train_model_path = ""  # path to checkpoint model for training
     test_model_path = ""  # path to model for testing
@@ -28,16 +28,16 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # train test dataloader config
     # ------------------------------------------------------------------
-    train_batch_size = 1
-    val_batch_size = 1
-    test_batch_size = 1
+    train_batch_size = 64
+    val_batch_size = 64
+    test_batch_size = 64
     num_workers = 0
     prefetch_factor = None
     pin_mem = False
     # ------------------------------------------------------------------
     # optimizer
     # ------------------------------------------------------------------
-    optimizer = "SGD"
+    optimizer = "RAdam"
     Adam = {
         "lr": 0.001,
         "betas": (0.9, 0.999),
@@ -116,7 +116,8 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # utils
     # ------------------------------------------------------------------
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    device = torch.device('cuda') if torch.cuda.is_available() else \
+        (torch.device('mps') if torch.has_mps else torch.device('cpu'))
     save_model = False
 
     def parse(self, kwargs):

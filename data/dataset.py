@@ -34,8 +34,8 @@ class RecaptureDataset(ImageFolder):
     def _training_transform():
         return T.Compose([
             T.Resize(cfg.img_size),
-            T.RandomHorizontalFlip(p=cfg.h_flip_p),
-            T.RandomVerticalFlip(p=cfg.v_flip_p),
+            # T.RandomHorizontalFlip(p=cfg.h_flip_p),
+            # T.RandomVerticalFlip(p=cfg.v_flip_p),
             T.ToTensor(),
             # T.Normalize(mean=cfg.data_mean, std=cfg.data_std)
         ])

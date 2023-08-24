@@ -37,7 +37,7 @@ def train(**kwargs):
     train_dataset = RecaptureDataset(root=cfg.train_root, training=True)
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=cfg.train_batch_size,
-                              shuffle=True,
+                              shuffle=False,
                               num_workers=cfg.num_workers,
                               prefetch_factor=cfg.prefetch_factor,
                               pin_memory=cfg.pin_mem)
@@ -79,7 +79,8 @@ def train(**kwargs):
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
     writer = SummaryWriter(log_dir=log_dir)
-    writer.add_graph(model=model, input_to_model=[torch.randn(1, 3, 224, 224), torch.randn(1, 3, 224, 224)])
+    writer.add_graph(model=model, input_to_model=[torch.randn(1, 3, 224, 224).to(cfg.device),
+                                                  torch.randn(1, 3, 224, 224).to(cfg.device)])
 
     # training
     train_step = 0
@@ -94,7 +95,6 @@ def train(**kwargs):
             dcts = dcts.to(device=cfg.device)
             rgbs = rgbs.to(device=cfg.device)
             ys = ys.to(device=cfg.device)
-
             # forward pass
             opt.zero_grad()
             logits = model(dcts, rgbs)

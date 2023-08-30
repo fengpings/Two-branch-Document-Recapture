@@ -12,11 +12,11 @@ class DefaultConfig:
     # model config
     # ------------------------------------------------------------------
     model = "Res50TBNet"  # model name
-    train_root = "/Users/fengping/Documents/深度学习笔记/CV基础/code/datas/dogcat/train"
-    val_root = "/Users/fengping/Documents/深度学习笔记/CV基础/code/datas/dogcat/test"
+    train_root = "data/dogcat/train"
+    val_root = "data/dogcat/test"
     test_root = "/Users/Tristan/Documents/projects/Two-branch-Document-Recapture/data/test/test"
 
-    run_name = "run2"
+    run_name = "run1"
 
     train_model_path = ""  # path to checkpoint model for training
     test_model_path = ""  # path to model for testing
@@ -28,9 +28,9 @@ class DefaultConfig:
     # ------------------------------------------------------------------
     # train test dataloader config
     # ------------------------------------------------------------------
-    train_batch_size = 64
-    val_batch_size = 64
-    test_batch_size = 64
+    train_batch_size = 16
+    val_batch_size = 16
+    test_batch_size = 16
     num_workers = 0
     prefetch_factor = None
     pin_mem = False

@@ -47,7 +47,7 @@ class Res50TBNet(nn.Module):
         self.ca_l3 = CrossAttention(dim=int(1024 * self.compress_factor))
         self.ca_l4 = CrossAttention(dim=int(2048*self.compress_factor))
         self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.bn1 = nn.BatchNorm2d(int(6656*self.compress_factor), momentum=None)
+        self.bn1 = nn.BatchNorm2d(int(6656*self.compress_factor))
         self.relu = nn.ReLU(inplace=True)
         self.mlp = MLP(in_dim=int(6656*self.compress_factor))
 

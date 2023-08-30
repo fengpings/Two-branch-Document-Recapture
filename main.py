@@ -48,6 +48,7 @@ def train(**kwargs):
                             num_workers=cfg.num_workers,
                             prefetch_factor=cfg.prefetch_factor,
                             pin_memory=cfg.pin_mem)
+    logger.info(f'class info: {val_dataset.class_to_idx}')
 
     # model
     model = getattr(models, cfg.model)(**cfg.Res50TBNet)
